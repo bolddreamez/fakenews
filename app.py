@@ -1,3 +1,4 @@
+from newspaper import Article
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
@@ -25,6 +26,37 @@ def predict():
         "prediction": "Fake" if pred == 0 else "Real",
         "confidence": round(conf * 100, 2)
     })
+@app.route("/predict-url", methods=["POST"])
+def predict_url():
+    data = request.get_json()
+    url = data.get("url")
+
+    if not url:
+        return jsonify({"error": "URL is required"}), 400
+
+    try:
+        article = Article(url)
+        article.download()
+        article.parse()
+
+        text = article.text
+
+        if len(text) < 100:
+            return jsonify({"error": "Article text too short"}), 400
+
+        vector = vectorizer.transform([text])
+        prediction = model.predict(vector)[0]
+        confidence = max(model.predict_proba(vector)[0])
+
+        return jsonify({
+            "prediction": "Fake" if prediction == 0 else "Real",
+            "confidence": round(confidence * 100, 2),
+            "title": article.title
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
+
