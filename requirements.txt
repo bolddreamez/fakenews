@@ -6,3 +6,5 @@ numpy
 joblib
 nltk
 gunicorn
+newspaper3k
+
