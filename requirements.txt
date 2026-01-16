@@ -1,10 +1,10 @@
-flask
+Flask
 flask-cors
+gunicorn
+joblib
 scikit-learn
 pandas
 numpy
-joblib
-nltk
-gunicorn
 newspaper3k
-
+lxml
+lxml_html_clean
