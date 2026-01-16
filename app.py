@@ -4,7 +4,16 @@ from flask_cors import CORS
 import joblib
 
 app = Flask(__name__)
-CORS(app)
+
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://bolddreamez.com",
+            "https://www.bolddreamez.com"
+        ]
+    }
+})
+
 
 model = joblib.load("fake_news_model.pkl")
 vectorizer = joblib.load("vectorizer.pkl")
@@ -59,4 +68,5 @@ def predict_url():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
