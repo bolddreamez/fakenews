@@ -35,8 +35,14 @@ def predict():
         "prediction": "Fake" if pred == 0 else "Real",
         "confidence": round(conf * 100, 2)
     })
-@app.route("/predict-url", methods=["POST"])
+from newspaper import Article
+
+@app.route("/predict-url", methods=["POST", "OPTIONS"])
 def predict_url():
+
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
+
     data = request.get_json()
     url = data.get("url")
 
@@ -49,18 +55,17 @@ def predict_url():
         article.parse()
 
         text = article.text
-
         if len(text) < 100:
-            return jsonify({"error": "Article text too short"}), 400
+            return jsonify({"error": "Article too short"}), 400
 
         vector = vectorizer.transform([text])
         prediction = model.predict(vector)[0]
         confidence = max(model.predict_proba(vector)[0])
 
         return jsonify({
+            "title": article.title,
             "prediction": "Fake" if prediction == 0 else "Real",
-            "confidence": round(confidence * 100, 2),
-            "title": article.title
+            "confidence": round(confidence * 100, 2)
         })
 
     except Exception as e:
@@ -68,5 +73,6 @@ def predict_url():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
